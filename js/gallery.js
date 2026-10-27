@@ -64,49 +64,59 @@ const images = [
   },
 ];
 
-const galleryList = document.querySelector(`.gallery`);
+// Знаходимо контейнер галереї
+const galleryList = document.querySelector('.gallery');
 
+// Створюємо розмітку галереї за один прохід
 const galleryMarkup = images
-    .map(
-        ({ preview, original, description }) => `
-            <li class="gallery-item">
-                <a class="gallery-link" href="${original}"
-                    <img 
-                        class="gallery-image"
-                        src="$preview"
-                        data-source="${original}"
-                        alt="${description}"
-                    />
-            </a>
-            </li >
-         `
-    )
-    .join(``);
+  .map(
+    ({ preview, original, description }) => `
+      <li class="gallery-item">
+        <a class="gallery-link" href="${original}">
+          <img
+            class="gallery-image"
+            src="${preview}"
+            data-source="${original}"
+            alt="${description}"
+          />
+        </a>
+      </li>
+    `
+  )
+  .join('');
 
-galleryList.incertAdjacendHTML(`beforeend`, galleryMarkup);
-galleryList.addEventListener(`click`, (event) => {
-    event.preventDefault();
+// Вставляємо розмітку за допомогою правильного методу insertAdjacentHTML
+galleryList.insertAdjacentHTML('beforeend', galleryMarkup);
 
-    const clickedImage = event.target.closest('.gallery-image');
-    if (!clickedImage) {
-        return;
-    }
+// Додаємо єдиний слухач подій click на контейнер (делегування)
+galleryList.addEventListener('click', (event) => {
+  event.preventDefault();
 
-    const largeImageURL = clickedImage.dataset.source;
-    const imageAlt = clickedImage.alt;
+  // Перевіряємо, чи клік припав саме на зображення галереї
+  if (!event.target.classList.contains('gallery-image')) {
+    return;
+  }
 
-    const instance = basicLightBox.create(`
-        <div class="modal">
+  const clickedImage = event.target;
+  const largeImageURL = clickedImage.dataset.source;
+  const imageAlt = clickedImage.alt;
+
+  // Ініціалізуємо модальне вікно за допомогою правильного ідентифікатора basicLightbox
+  const instance = basicLightbox.create(`
+    <div class="modal">
       <img src="${largeImageURL}" alt="${imageAlt}" width="800" height="600">
     </div>
-        `);
-    instance.show();
+  `);
 
-    const onErsPress = (e) => {
-        if (e.code === `Escape`) {
-            instance.close();
-            window.removeEventListener(`keydown`, onErsPress);
-        }
-    };
-    window.addEventListener(`keydown`, onErsPress)
+  instance.show();
+
+  // Додаємо закриття по клавіші Escape із зрозумілою назвою обробника
+  const onEscPress = (e) => {
+    if (e.code === 'Escape') {
+      instance.close();
+      window.removeEventListener('keydown', onEscPress);
+    }
+  };
+
+  window.addEventListener('keydown', onEscPress);
 });
